@@ -1,0 +1,39 @@
+body {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #eee;
+    overflow: auto;
+}
+
+.grille {
+    display: grid;
+    grid-template-columns: repeat(21, 10px);
+
+    grid-template-rows: repeat(21, 10px);
+
+}
+
+.case {
+    width: 10px;
+    height: 10px;
+    background: rgb(0, 0, 0);
+    /* murs par défaut */
+}
+
+.chemin {
+    background: white;
+    /* chemins */
+}
+
+.Génerer {
+    color: white;
+    background-color: black;
+    border: 1px solid black;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 20px;
+}
