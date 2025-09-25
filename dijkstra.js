@@ -94,7 +94,8 @@ function updateNodeDistance(nodeName, distance) {
 
 async function dijkstra(graph, start, end) {
   clearAlgorithmLines();
-  logInfo(`🎯 DIJKSTRA : ${start} → ${end}`);
+  logInfo(`DIJKSTRA : ${start} → ${end}`);
+  await sleep(1000);
 
   const distances = {};
   const previous = {};
@@ -136,7 +137,7 @@ async function dijkstra(graph, start, end) {
       break;
     }
 
-    logInfo(`📍 Examen de ${closest} (distance: ${distances[closest]})`);
+    logInfo(`Examen de ${closest} (distance: ${distances[closest]})`);
 
     // Examiner les voisins
     for (let neighbor in graph[closest]) {
@@ -155,15 +156,15 @@ async function dijkstra(graph, start, end) {
         const blueLineId = drawConsistentLineWithId(
           closest,
           neighbor,
-          "blue",
+          "#6984a3",
           0
         );
 
         // Surligner le voisin en bleu quand sa distance est améliorée
-        highlightNode(neighbor, "#4444ff");
+        highlightNode(neighbor, "#6984a3");
 
         logInfo(
-          `💡 ${neighbor} : ${
+          `${neighbor} : ${
             oldDist === Infinity ? "∞" : oldDist
           } → ${newDist} (via ${closest})`
         );
@@ -179,7 +180,7 @@ async function dijkstra(graph, start, end) {
 
     visited.add(closest);
     // Marquer comme visité en vert
-    highlightNode(closest, "#44ff44");
+    highlightNode(closest, "#B0F2B6");
     iteration++;
     await sleep(1000);
   }
@@ -195,7 +196,7 @@ async function dijkstra(graph, start, end) {
 
   // Tracer le chemin optimal en jaune épais avec lignes consistantes
   for (let i = 0; i < path.length - 1; i++) {
-    drawConsistentLine(path[i], path[i + 1], "yellow", i * 200);
+    drawConsistentLine(path[i], path[i + 1], "#D4AF37", i * 200);
   }
 
   logInfo(
@@ -284,28 +285,28 @@ function highlightNode(nodeName, color) {
   const element = document.querySelector(`.${nodeName}`);
   if (element) {
     element.style.border = `4px solid ${color}`;
-    element.style.boxShadow = `0 0 15px ${color}`;
 
     // Si c'est vert (visité), rayer le texte du nom
-    if (color === "#44ff44") {
+    if (color === "#B0F2B6") {
       const nameElement = element.querySelector("p:nth-of-type(1)");
       if (nameElement) {
         nameElement.style.textDecoration = "line-through";
-        nameElement.style.color = "#666"; // Couleur plus pâle
-        nameElement.style.opacity = "0.7"; // Légèrement transparent
+        nameElement.style.color = "#666";
+        nameElement.style.opacity = "0.7";
       }
     }
 
     // Durée différente selon la couleur
-    const duration = color === "#4444ff" ? 3000 : 2000;
+    const duration = color === "#6984a3" ? 3000 : 2000;
 
     // Retirer le surlignage après la durée définie
     setTimeout(() => {
       element.style.border = "";
       element.style.boxShadow = "";
 
-      // Ne pas retirer le style barré pour les nœuds visités (vert)
-      if (color !== "#44ff44") {
+      // CORRECTION: Ne pas retirer le style barré pour les nœuds visités (vert)
+      if (color !== "#B0F2B6") {
+        // Changé de "#44ff44" vers "#B0F2B6"
         const nameElement = element.querySelector("p:nth-of-type(1)");
         if (nameElement) {
           nameElement.style.textDecoration = "";
@@ -327,9 +328,10 @@ async function runDijkstra() {
 
   setTimeout(() => {
     logInfo(
-      `🎉 RÉSULTAT: Distance ${result.distance}, Chemin: ${result.path.join(
+      `RÉSULTAT: Distance ${result.distance}, Chemin: ${result.path.join(
         " → "
       )}`
     );
+    document.getElementById("enterLab").style.display = "block";
   }, result.path.length * 200 + 1000);
 }
