@@ -1,10 +1,20 @@
 class PathfindingDemo {
-  constructor() {
-    this.maze = new Maze();
+  constructor(mazeGenerator = null) {
+    // Use provided maze generator or create a new one
+    this.maze = mazeGenerator || new MazeGenerator();
+    
+    // Initialize maze if not already done
+    if (!this.maze.getGrid() || this.maze.getGrid().length === 0) {
+      this.maze.generate();
+    }
+    
     this.astar = new AstarAlgo(this.maze.getGrid());
     this.path = null;
-    this.startPos = { x: 0, y: 0 };
-    this.endPos = { x: 6, y: 9 };
+    
+    // Get start and end positions from the maze generator
+    this.startPos = this.maze.getStartPosition() || { x: 0, y: 0 };
+    this.endPos = this.maze.getEndPosition() || { x: 6, y: 9 };
+    
     this.isPathfinding = false;
     this.currentProcessingNode = null;
     this.visitedNodes = [];
@@ -302,6 +312,33 @@ class PathfindingDemo {
     this.renderMaze();
   }
 
+  // Regenerate maze with new size
+  regenerateMaze(size = null) {
+    // Reset any ongoing pathfinding
+    this.reset();
+    
+    // Generate new maze
+    if (size) {
+      this.maze.taille = size;
+    }
+    const positions = this.maze.generate();
+    
+    // Update A* algorithm with new grid
+    this.astar = new AstarAlgo(this.maze.getGrid());
+    this.astar.setVisualizationCallback((data) => {
+      this.onNodeProcessed(data);
+    });
+    
+    // Update start and end positions
+    this.startPos = positions.start || { x: 0, y: 0 };
+    this.endPos = positions.end || { x: 6, y: 9 };
+    
+    console.log("Maze regenerated with start:", this.startPos, "end:", this.endPos);
+    
+    // Re-render if we're using the maze container
+    this.renderMaze();
+  }
+
   // Allow changing start and end positions
   setStartPosition(x, y) {
     if (this.maze.isWalkable(x, y)) {
@@ -319,8 +356,23 @@ class PathfindingDemo {
 }
 
 // Create and initialize the demo
-const demo = new PathfindingDemo();
+// Check if we have a global mazeGenerator from script.js
+const demo = new PathfindingDemo(window.mazeGenerator);
 demo.init();
 
 // Make demo available globally for debugging
 window.pathfindingDemo = demo;
+
+// If we have a maze generator, set up integration
+if (window.mazeGenerator) {
+  // Override the maze generator's button event to also update the pathfinding demo
+  const originalGenerate = window.mazeGenerator.generate.bind(window.mazeGenerator);
+  window.mazeGenerator.generate = function() {
+    const result = originalGenerate();
+    // Update the pathfinding demo with the new maze
+    if (window.pathfindingDemo) {
+      window.pathfindingDemo.regenerateMaze();
+    }
+    return result;
+  };
+}
