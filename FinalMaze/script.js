@@ -23,8 +23,8 @@ class MazeGenerator {
     
     this.grille.innerHTML = "";
     this.cells = [];
-    this.grille.style.gridTemplateColumns = `repeat(${this.taille}, 10px)`;
-    this.grille.style.gridTemplateRows = `repeat(${this.taille}, 10px)`;
+    this.grille.style.gridTemplateColumns = `repeat(${this.taille}, 20px)`;
+    this.grille.style.gridTemplateRows = `repeat(${this.taille}, 20px)`;
     
     for (let i = 0; i < this.taille * this.taille; i++) {
       const div = document.createElement("div");
@@ -190,6 +190,10 @@ class MazeGenerator {
     if (this.bouton) {
       this.bouton.addEventListener("click", () => {
         this.generate();
+        // Update pathfinding demo with new maze
+        if (window.pathfindingDemo) {
+          window.pathfindingDemo.regenerateMaze();
+        }
       });
     }
   }

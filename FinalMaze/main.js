@@ -20,6 +20,10 @@ class PathfindingDemo {
     this.visitedNodes = [];
     this.currentPathFindingPromise = null;
 
+    // Speed control elements
+    this.speedSlider = null;
+    this.speedValue = null;
+
     // Set up visualization callback for A* algorithm
     this.astar.setVisualizationCallback((data) => {
       this.onNodeProcessed(data);
@@ -136,113 +140,98 @@ class PathfindingDemo {
 
   // Update visualization during pathfinding process
   updateVisualization() {
-    const mazeContainer = document.getElementById("maze-container");
+    const mazeContainer = document.getElementById("labyrinthe");
     if (!mazeContainer) return;
 
     const grid = this.maze.getGrid();
     const dimensions = this.maze.getDimensions();
 
-    // Clear existing visualization
-    mazeContainer.innerHTML = "";
+    // Don't clear the container - update existing cells instead
+    const cells = mazeContainer.querySelectorAll('.case');
 
-    // Set CSS grid properties
-    mazeContainer.style.gridTemplateColumns = `repeat(${dimensions.cols}, 30px)`;
-    mazeContainer.style.gridTemplateRows = `repeat(${dimensions.rows}, 30px)`;
+    cells.forEach((cell, index) => {
+      const x = index % dimensions.cols;
+      const y = Math.floor(index / dimensions.cols);
 
-    for (let y = 0; y < dimensions.rows; y++) {
-      for (let x = 0; x < dimensions.cols; x++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.dataset.x = x;
-        cell.dataset.y = y;
+      // Reset classes
+      cell.className = 'case';
 
-        // Determine cell type
-        if (grid[y][x] === 1) {
-          cell.classList.add("wall");
-        } else {
-          cell.classList.add("walkable");
-        }
-
-        // Mark start and end positions
-        if (x === this.startPos.x && y === this.startPos.y) {
-          cell.classList.add("start");
-        }
-        if (x === this.endPos.x && y === this.endPos.y) {
-          cell.classList.add("end");
-        }
-
-        // Mark visited nodes
-        if (this.visitedNodes) {
-          const isVisited = this.visitedNodes.some(
-            (node) => node.x === x && node.y === y
-          );
-          if (isVisited) {
-            cell.classList.add("visited");
-          }
-        }
-
-        // Mark current processing node
-        if (
-          this.currentProcessingNode &&
-          this.currentProcessingNode.x === x &&
-          this.currentProcessingNode.y === y
-        ) {
-          cell.classList.add("current");
-        }
-
-        mazeContainer.appendChild(cell);
+      // Determine cell type
+      if (grid[y][x] === 1) {
+        cell.classList.add("wall");
+      } else {
+        cell.classList.add("chemin");
       }
-    }
+
+      // Mark start and end positions
+      if (x === this.startPos.x && y === this.startPos.y) {
+        cell.classList.add("start");
+      }
+      if (x === this.endPos.x && y === this.endPos.y) {
+        cell.classList.add("end");
+      }
+
+      // Mark visited nodes
+      if (this.visitedNodes) {
+        const isVisited = this.visitedNodes.some(
+          (node) => node.x === x && node.y === y
+        );
+        if (isVisited) {
+          cell.classList.add("visited");
+        }
+      }
+
+      // Mark current processing node
+      if (
+        this.currentProcessingNode &&
+        this.currentProcessingNode.x === x &&
+        this.currentProcessingNode.y === y
+      ) {
+        cell.classList.add("current");
+      }
+    });
   }
 
   // Render the maze in the HTML
   renderMaze() {
-    const mazeContainer = document.getElementById("maze-container");
+    const mazeContainer = document.getElementById("labyrinthe");
     if (!mazeContainer) return;
 
-    mazeContainer.innerHTML = "";
-    const grid = this.maze.getGrid();
-    const dimensions = this.maze.getDimensions();
+    // Update existing cells instead of recreating them
+    const cells = mazeContainer.querySelectorAll('.case');
 
-    // Set CSS grid properties
-    mazeContainer.style.gridTemplateColumns = `repeat(${dimensions.cols}, 30px)`;
-    mazeContainer.style.gridTemplateRows = `repeat(${dimensions.rows}, 30px)`;
+    cells.forEach((cell, index) => {
+      const x = index % this.maze.taille;
+      const y = Math.floor(index / this.maze.taille);
 
-    for (let y = 0; y < dimensions.rows; y++) {
-      for (let x = 0; x < dimensions.cols; x++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.dataset.x = x;
-        cell.dataset.y = y;
+      // Reset classes
+      cell.className = 'case';
 
-        // Determine cell type
-        if (grid[y][x] === 1) {
-          cell.classList.add("wall");
-        } else {
-          cell.classList.add("walkable");
-        }
-
-        // Mark start and end positions
-        if (x === this.startPos.x && y === this.startPos.y) {
-          cell.classList.add("start");
-        }
-        if (x === this.endPos.x && y === this.endPos.y) {
-          cell.classList.add("end");
-        }
-
-        // Mark path if it exists
-        if (this.path) {
-          const isInPath = this.path.some(
-            (pathNode) => pathNode.x === x && pathNode.y === y
-          );
-          if (isInPath) {
-            cell.classList.add("path");
-          }
-        }
-
-        mazeContainer.appendChild(cell);
+      // Determine cell type
+      if (this.maze.grid[y][x] === 1) {
+        cell.classList.add("wall");
+      } else {
+        cell.classList.add("chemin");
       }
-    }
+
+      // Mark start and end positions
+      if (x === this.startPos.x && y === this.startPos.y) {
+        cell.classList.add("start");
+      }
+      if (x === this.endPos.x && y === this.endPos.y) {
+        cell.classList.add("end");
+      }
+
+      // Mark path if it exists
+      if (this.path) {
+        const isInPath = this.path.some(
+          (pathNode) => pathNode.x === x && pathNode.y === y
+        );
+        if (isInPath) {
+          cell.classList.add("path");
+        }
+      }
+    });
   }
 
   // Initialize the demo
@@ -284,6 +273,22 @@ class PathfindingDemo {
         this.resume();
       });
     }
+
+    // Initialize speed control
+    this.speedSlider = document.getElementById("speed-slider");
+    this.speedValue = document.getElementById("speed-value");
+
+    if (this.speedSlider && this.speedValue) {
+      // Set initial value display
+      this.speedValue.textContent = this.speedSlider.value + "ms";
+
+      // Add event listener for slider changes
+      this.speedSlider.addEventListener("input", (e) => {
+        const value = parseInt(e.target.value);
+        this.speedValue.textContent = value + "ms";
+        this.astar.setDelayDuration(value);
+      });
+    }
   }
 
   // Reset the visualization
@@ -312,30 +317,30 @@ class PathfindingDemo {
     this.renderMaze();
   }
 
-  // Regenerate maze with new size
+  // Regenerate maze with new size (called after maze generator updates)
   regenerateMaze(size = null) {
     // Reset any ongoing pathfinding
     this.reset();
-    
-    // Generate new maze
+
+    // Update maze size if specified
     if (size) {
       this.maze.taille = size;
     }
-    const positions = this.maze.generate();
-    
-    // Update A* algorithm with new grid
+
+    // The maze generator has already updated the grid and positions
+    // Just update A* algorithm with the new grid
     this.astar = new AstarAlgo(this.maze.getGrid());
     this.astar.setVisualizationCallback((data) => {
       this.onNodeProcessed(data);
     });
-    
-    // Update start and end positions
-    this.startPos = positions.start || { x: 0, y: 0 };
-    this.endPos = positions.end || { x: 6, y: 9 };
-    
+
+    // Update start and end positions from maze generator
+    this.startPos = this.maze.getStartPosition() || { x: 0, y: 0 };
+    this.endPos = this.maze.getEndPosition() || { x: 6, y: 9 };
+
     console.log("Maze regenerated with start:", this.startPos, "end:", this.endPos);
-    
-    // Re-render if we're using the maze container
+
+    // Re-render the maze (this will show the path if it exists)
     this.renderMaze();
   }
 
@@ -362,17 +367,3 @@ demo.init();
 
 // Make demo available globally for debugging
 window.pathfindingDemo = demo;
-
-// If we have a maze generator, set up integration
-if (window.mazeGenerator) {
-  // Override the maze generator's button event to also update the pathfinding demo
-  const originalGenerate = window.mazeGenerator.generate.bind(window.mazeGenerator);
-  window.mazeGenerator.generate = function() {
-    const result = originalGenerate();
-    // Update the pathfinding demo with the new maze
-    if (window.pathfindingDemo) {
-      window.pathfindingDemo.regenerateMaze();
-    }
-    return result;
-  };
-}
