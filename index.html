@@ -4,10 +4,35 @@
     <meta charset="UTF-8" />
     <title>Labyrinthe</title>
     <link rel="stylesheet" href="/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel+Decorative:wght@700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container">
-      <button class="Génerer">Génerer un nouveau labyrinthe</button>
+      <div class="btnContainer">
+        <p>Choisissez la taille du labyrinthe</p>
+        <select id="tailleSelect">
+          <option value="11">11 x 11</option>
+          <option value="21">21 x 21</option>
+          <option value="31">31 x 31</option>
+          <option value="41">41 x 41</option>
+          <option value="51">51 x 51</option>
+          <option value="61">61 x 61</option>
+          <option value="71">71 x 71</option>
+          <option value="81">81 x 81</option>
+          <option value="91">91 x 91</option>
+          <option value="101">101 x 101</option>
+          <option value="111">111 x 111</option>
+        </select>
+        <button class="Génerer" id="GenererLabyrinthe">
+          Génerer un nouveau labyrinthe
+        </button>
+        <button class="RésoudreLabyrinthe" id="RésoudreLabyrinthe">
+          Résoudre le labyrinthe
+        </button>
+      </div>
     </div>
     <div class="grille" id="labyrinthe"></div>
     <script src="/script.js"></script>

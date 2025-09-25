@@ -1,13 +1,21 @@
-const taille = 21;
+let taille = 61;
 let cells = [];
 
+const tailleSelect = document.getElementById("tailleSelect");
 const grille = document.getElementById("labyrinthe");
-const bouton = document.querySelector(".Génerer");
+const bouton = document.getElementById("GenererLabyrinthe");
 
 // Fonction pour créer la grille
 function creerGrille() {
+  // Met à jour la taille selon le select
+
+  if (tailleSelect) {
+    taille = parseInt(tailleSelect.value);
+  }
   grille.innerHTML = "";
   cells = [];
+  grille.style.gridTemplateColumns = `repeat(${taille}, 10px)`;
+  grille.style.gridTemplateRows = `repeat(${taille}, 10px)`;
   for (let i = 0; i < taille * taille; i++) {
     const div = document.createElement("div");
     div.classList.add("case");
@@ -68,12 +76,21 @@ function faireEntreeSortie() {
       break;
     }
   }
-  // Sortie en bas
-  for (let x = taille - 2; x > 0; x--) {
-    if (cells[index(x, taille - 2)].classList.contains("chemin")) {
-      cells[index(x, taille - 1)].classList.add("chemin");
-      break;
+
+  // Sortie verte aléatoire (hors entrée)
+  // On récupère toutes les cases "chemin" sauf la première ligne (entrée)
+  let chemins = [];
+  for (let y = 1; y < taille; y++) {
+    for (let x = 0; x < taille; x++) {
+      if (cells[index(x, y)].classList.contains("chemin")) {
+        chemins.push([x, y]);
+      }
     }
+  }
+  if (chemins.length > 0) {
+    const [Sortie, sortie] =
+      chemins[Math.floor(Math.random() * chemins.length)];
+    cells[index(Sortie, sortie)].classList.add("sortie");
   }
 }
 
@@ -81,3 +98,12 @@ function faireEntreeSortie() {
 creerGrille();
 genererLabyrinthe(1, 1);
 faireEntreeSortie();
+
+// Générer un nouveau labyrinthe au clic sur le bouton
+if (bouton) {
+  bouton.addEventListener("click", () => {
+    creerGrille();
+    genererLabyrinthe(1, 1);
+    faireEntreeSortie();
+  });
+}
