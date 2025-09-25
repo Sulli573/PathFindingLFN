@@ -119,7 +119,7 @@
   color: rgb(6, 255, 76);
 }
 
-    /* Titre centré */
+   
 h1, h2 {
       font-weight:bold;
       font-size:46px;
@@ -143,7 +143,35 @@ a {
   font-size:26px;
 }
 
+.p2 {
+  text-align: center;
+  font-size:26px
+}
+
 img {
-  width: 50px;   /* largeur fixe */
-  height: auto;   /* hauteur auto pour garder les proportions */
+  width: 50px;   
+  height: auto;   
+}
+
+
+.lightning {
+  position: absolute;
+  top: 20px;       
+  right: 0px;    
+  width: 540px;    /* taille de l’éclair */
+  height: auto;
+  z-index: 2;
+  opacity: 0;
+  animation: flash 3s infinite; /* cycle de réaparition des éclairs*/
+   transform: scaleX(-1); /* retourne l'image horizontalement */
+
+}
+
+
+@keyframes flash {
+  0%, 100% { opacity: 0; }
+  5%, 7%   { opacity: 1; }
+  10%      { opacity: 0; }
+  12%      { opacity: 1; }
+  15%, 80% { opacity: 0; }
 }
