@@ -1,0 +1,149 @@
+     /* Style global */
+    body {
+  
+      margin: 20px;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: rgb(247, 247, 247);
+
+    }
+
+    /* Barre de navigation */
+    nav {
+      background: #333;
+      color: #fff;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 15px;
+      transition: background 0.3s;
+    }
+
+    nav a:hover {
+      background: #ffffff;
+      border-radius: 5px;
+    }
+
+    /* Sections */
+    section {
+      padding: 60px 20px;
+      min-height: 100vh;
+    }
+
+.section1 {
+  border-radius: 25px;
+  border: solid 5px;
+  height: 100vh; /* occupe toute la hauteur de la fenêtre */
+  background-image: url("image/fond-kaamelott.jpg");
+  background-size: cover;      /* image couvre tout le div */
+  background-position: center; /* centrage */
+  background-repeat: no-repeat;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;     /* centre le texte verticalement */
+  align-items: center;         /* centre le texte horizontalement */
+  text-align: center;
+  padding: 0 20px;
+  position: relative;
+}
+
+.section1::before {
+  border-radius: 25px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* noir semi-transparent */
+  z-index: 0;
+}
+
+.section1 > * {
+  position: relative;
+  z-index: 1; /* texte au-dessus de l’overlay */
+}
+
+.section1 h1 {
+  color: rgb(6, 255, 76);
+}
+.section2 {
+      border-radius: 25px;
+      background-color: #0fec59;
+      height: 50vh;
+    }
+
+.section3 {
+  border-radius: 25px;
+  height: 50vh; /* occupe toute la hauteur de la fenêtre */
+  background-image: url("image/fond-kaamelott.jpg");
+  background-size: cover;      /* image couvre tout le div */
+  background-position: center; /* centrage */
+  background-repeat: no-repeat;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;     /* centre le texte verticalement */
+  align-items: center;         /* centre le texte horizontalement */
+  text-align: center;
+  padding: 0 20px;
+  position: relative;
+}
+
+.section3::before {
+  border-radius: 25px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* noir semi-transparent */
+  z-index: 0;
+}
+
+.section3 > * {
+  position: relative;
+  z-index: 1; /* texte au-dessus de l’overlay */
+}
+.section3 h1 {
+  color: rgb(6, 255, 76);
+}
+
+    /* Titre centré */
+h1, h2 {
+      font-weight:bold;
+      font-size:46px;
+      text-align: center;
+    }
+h2 {
+      font-weight:bold;
+      font-size:32px;
+      text-align: center;
+    }
+.section4 {
+      border-radius: 25px;
+      background-color: #0fec59;
+      height: 50vh;
+    }
+
+a {
+ color : red;
+}
+.p1 {
+  font-size:26px;
+}
+
+img {
+  width: 50px;   /* largeur fixe */
+  height: auto;   /* hauteur auto pour garder les proportions */
+}
