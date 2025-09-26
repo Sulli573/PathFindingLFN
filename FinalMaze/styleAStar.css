@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel+Decorative:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel+Decorative:wght@700&display=swap");
 
 * {
   margin: 0;
@@ -7,7 +7,8 @@
 }
 
 body {
-  background: #f6ecd9 url('https://www.transparenttextures.com/patterns/old-mathematics.png');
+  background: #f6ecd9
+    url("https://www.transparenttextures.com/patterns/old-mathematics.png");
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -15,7 +16,7 @@ body {
   align-items: center;
   height: 200vh;
   overflow: auto;
-  font-family: 'UnifrakturCook', 'Cinzel Decorative', 'Times New Roman', serif;
+  font-family: "UnifrakturCook", "Cinzel Decorative", "Times New Roman", serif;
   font-size: 50px;
   color: #4b2e05;
 }
@@ -26,12 +27,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background: #f9f3e3 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+  background: #f9f3e3
+    url("https://www.transparenttextures.com/patterns/wood-pattern.png");
   background-size: cover;
   background-blend-mode: multiply;
   padding: 32px 24px 24px 24px;
   border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(120, 72, 0, 0.18), 0 1.5px 4px rgba(120, 72, 0, 0.10);
+  box-shadow: 0 4px 24px rgba(120, 72, 0, 0.18),
+    0 1.5px 4px rgba(120, 72, 0, 0.1);
   margin-bottom: 24px;
   min-width: 260px;
   border: 20px double #a67c52;
@@ -40,7 +43,7 @@ body {
 }
 
 h1 {
-  font-family: 'Cinzel Decorative', serif;
+  font-family: "Cinzel Decorative", serif;
   font-size: 2.5rem;
   color: #4b2e05;
   text-shadow: 2px 2px 4px rgba(120, 72, 0, 0.3);
@@ -85,9 +88,9 @@ h1 {
   border: 2px solid #a67c52;
   border-radius: 8px;
   color: #4b2e05;
-  font-family: 'Cinzel Decorative', 'UnifrakturCook', serif;
+  font-family: "Cinzel Decorative", "UnifrakturCook", serif;
   padding: 6px 12px;
-  box-shadow: 0 1px 4px rgba(120, 72, 0, 0.10);
+  box-shadow: 0 1px 4px rgba(120, 72, 0, 0.1);
   width: 120px;
 }
 
@@ -107,7 +110,7 @@ h1 {
   padding: 8px;
   margin: 5px;
   border-radius: 20px;
-  font-family: 'UnifrakturCook', 'Cinzel Decorative', serif;
+  font-family: "UnifrakturCook", "Cinzel Decorative", serif;
   font-size: 1.2rem;
   letter-spacing: 2px;
   cursor: pointer;
@@ -134,7 +137,7 @@ h1 {
   padding: 12px 20px;
   margin: 5px;
   border-radius: 20px;
-  font-family: 'UnifrakturCook', 'Cinzel Decorative', serif;
+  font-family: "UnifrakturCook", "Cinzel Decorative", serif;
   font-size: 1.1rem;
   letter-spacing: 1px;
   cursor: pointer;
@@ -169,7 +172,7 @@ h1 {
 .speed-control label {
   font-size: 1rem;
   color: #4b2e05;
-  font-family: 'Cinzel Decorative', serif;
+  font-family: "Cinzel Decorative", serif;
   font-weight: bold;
 }
 
@@ -191,7 +194,7 @@ h1 {
   background: #7c4a02;
   cursor: pointer;
   border: 2px solid #a67c52;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .speed-control input[type="range"]::-moz-range-thumb {
@@ -201,13 +204,13 @@ h1 {
   background: #7c4a02;
   cursor: pointer;
   border: 2px solid #a67c52;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .speed-control span {
   font-size: 0.9rem;
   color: #4b2e05;
-  font-family: 'UnifrakturCook', serif;
+  font-family: "UnifrakturCook", serif;
   min-width: 60px;
   text-align: center;
 }
@@ -265,6 +268,16 @@ h1 {
   box-shadow: 0 0 4px rgba(168, 230, 207, 0.6);
 }
 
+.case.path-tracing {
+  background: linear-gradient(90deg, #ffd700 0%, #ffb347 100%) !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.9), 0 0 20px rgba(255, 215, 0, 0.6);
+  animation: pathTrace 1.6s ease-in-out infinite alternate,
+    pathGlow 2.5s ease-in;
+  transform: scale(1.2);
+  z-index: 10;
+  position: relative;
+}
+
 .case.visited {
   background: linear-gradient(90deg, #ffeaa7 0%, #fab1a0 100%) !important;
   opacity: 0.8;
@@ -278,24 +291,60 @@ h1 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 0.8; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
+  }
 }
 
 @keyframes pulse {
-  from { transform: scale(1); }
-  to { transform: scale(1.1); }
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pathTrace {
+  from {
+    transform: scale(1.0);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.9), 0 0 20px rgba(255, 215, 0, 0.6);
+  }
+  to {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 1), 0 0 24px rgba(255, 215, 0, 0.8);
+  }
+}
+
+@keyframes pathGlow {
+  0% {
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  25% {
+    filter: brightness(1.15) hue-rotate(5deg);
+  }
+  50% {
+    filter: brightness(1.3) hue-rotate(10deg);
+  }
+  75% {
+    filter: brightness(1.15) hue-rotate(5deg);
+  }
+  100% {
+    filter: brightness(1) hue-rotate(0deg);
+  }
 }
 
 .status {
   text-align: center;
   font-size: 1.2rem;
   color: #4b2e05;
-  font-family: 'Cinzel Decorative', serif;
+  font-family: "Cinzel Decorative", serif;
   margin-top: 20px;
   padding: 10px;
   background: rgba(246, 236, 217, 0.5);
   border-radius: 10px;
   border: 2px solid #a67c52;
 }
-

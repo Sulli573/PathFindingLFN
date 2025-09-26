@@ -105,7 +105,7 @@ class PathfindingDemo {
     this.updateControlButtons('running');
     const findPathBtn = document.getElementById("find-path-btn");
     if (findPathBtn) {
-      findPathBtn.textContent = "Finding Path...";
+      findPathBtn.textContent = "En recherche du chemin...";
       findPathBtn.disabled = true;
     }
 
@@ -129,12 +129,17 @@ class PathfindingDemo {
       // Update button states
       this.updateControlButtons('idle');
       if (findPathBtn) {
-        findPathBtn.textContent = "Find Path";
+        findPathBtn.textContent = "Trouver le chemin";
         findPathBtn.disabled = false;
       }
 
       // Final render with complete path
       this.renderMaze();
+
+      // Animate the path if one was found
+      if (this.path && this.path.length > 0) {
+        await this.animatePath();
+      }
     }
   }
 
@@ -306,11 +311,20 @@ class PathfindingDemo {
     this.visitedNodes = [];
     this.isPathfinding = false;
 
+    // Clear any path tracing animations
+    const mazeContainer = document.getElementById("labyrinthe");
+    if (mazeContainer) {
+      const tracingCells = mazeContainer.querySelectorAll('.path-tracing');
+      tracingCells.forEach(cell => {
+        cell.classList.remove('path-tracing');
+      });
+    }
+
     // Update button states
     this.updateControlButtons('idle');
     const findPathBtn = document.getElementById("find-path-btn");
     if (findPathBtn) {
-      findPathBtn.textContent = "Find Path";
+      findPathBtn.textContent = "Trouver le chemin";
       findPathBtn.disabled = false;
     }
 
@@ -342,6 +356,57 @@ class PathfindingDemo {
 
     // Re-render the maze (this will show the path if it exists)
     this.renderMaze();
+  }
+
+  // Animate the path tracing from start to end
+  async animatePath() {
+    console.log("Animating path with", this.path.length, "nodes");
+
+    const mazeContainer = document.getElementById("labyrinthe");
+    if (!mazeContainer) return;
+
+    const dimensions = this.maze.getDimensions();
+    const cells = mazeContainer.querySelectorAll('.case');
+
+    // Use a slightly faster animation speed for path tracing
+    const animationDelay = Math.max(100, this.astar.delayDuration - 200);
+
+    // First, ensure all path nodes are visible
+    this.path.forEach((pathNode, index) => {
+      const cellIndex = pathNode.y * dimensions.cols + pathNode.x;
+      const cell = cells[cellIndex];
+      if (cell) {
+        cell.classList.add("path");
+      }
+    });
+
+    // Wait a moment before starting the animation
+    await this.delay(500);
+
+    // Animate tracing the path
+    for (let i = 0; i < this.path.length; i++) {
+      const pathNode = this.path[i];
+      const cellIndex = pathNode.y * dimensions.cols + pathNode.x;
+      const cell = cells[cellIndex];
+
+      if (cell) {
+        // Remove existing path class and add tracing class
+        cell.classList.remove("path");
+        cell.classList.add("path-tracing");
+
+        // Add a small delay between each step
+        if (i < this.path.length - 1) {
+          await this.delay(50);
+        }
+      }
+    }
+
+    console.log("Path animation completed");
+  }
+
+  // Helper method for delays
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // Allow changing start and end positions
