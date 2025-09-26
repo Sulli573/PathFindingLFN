@@ -1,0 +1,145 @@
+@font-face {
+  font-family: "Cinzel";
+  src: url("./fonts/cinzel.ttf");
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+p {
+  font-family: "Cinzel";
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+h1 {
+  font-family: "Cinzel";
+  font-weight: bold;
+  font-size: 24px;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.info {
+  background-color: #f0f0f0;
+  height: 60px;
+  width: 800px;
+  top: 5vh;
+  border: 2px solid #303030;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.containerGrid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 2px;
+  height: 600px;
+  width: 1000px;
+  padding: 20px;
+  border: 2px solid #303030;
+  border-radius: 10px;
+  background-image: url("images/Land.png");
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  position: relative;
+  margin-top: 80px;
+}
+
+.grid-item {
+  border: 1px solid #b0fba5;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+  transition: all 0.3s ease;
+  padding: 2px;
+  box-sizing: border-box;
+}
+.grid-item:has(img) {
+  background-color: #fc5d5d33;
+  border: 2px solid #b0fba5;
+}
+
+.size {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+#startButton {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #f0f0f0;
+  border: 1px solid #303030;
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: "Cinzel";
+}
+#pauseButton {
+  position: fixed;
+  bottom: 30px;
+  right: 150px;
+  background-color: #f0f0f0;
+  border: 1px solid #303030;
+
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: "Cinzel";
+}
+
+#enterLab {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000000;
+  background-color: #fdf1b8;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 25px;
+  border: 2px solid #c0c05e;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: "Cinzel";
+  text-decoration: none;
+  color: #383e42;
+  text-align: center;
+}
