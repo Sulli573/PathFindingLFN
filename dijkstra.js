@@ -1,3 +1,4 @@
+// ===== GRAPHE DES CONNEXIONS =====
 const graph = {
   kaamelott: { village1: 4, village2: 2, broceliande: 5 },
   village1: { kaamelott: 4, orcanie: 7, mountain: 3 },
@@ -7,83 +8,31 @@ const graph = {
   carmelide: { village2: 4, lugdunum: 3 },
   hammeau: { village2: 6, lugdunum: 5 },
   mountain: { village1: 3, orcanie: 2, avalon: 4 },
-  avalon: {
-    broceliande: 2,
-    mountain: 4,
-    lugdunum: 6,
-  },
+  avalon: { broceliande: 2, mountain: 4, lugdunum: 6 },
   lugdunum: { carmelide: 3, hammeau: 5, avalon: 6 },
 };
 
-// Fonction utilitaire pour attendre
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// ===== VARIABLES GLOBALES =====
+let isPaused = false;
+let pauseResolver = null;
+
+// ===== UTILITAIRES =====
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  await pauseExecution();
 }
 
 function logInfo(msg) {
   const info = document.querySelector(".info");
   if (info) {
     info.innerHTML = msg;
-    console.log(msg); // Aussi dans la console
+    console.log(msg);
   }
 }
 
-// Fonction pour effacer seulement les lignes d'algorithme, pas les routes de base
-function clearAlgorithmLines() {
-  const svg = document.getElementById("svg-lines");
-  if (svg) {
-    // Supprimer seulement les lignes qui ne sont pas des routes de base
-    const paths = svg.querySelectorAll("path");
-    paths.forEach((path) => {
-      const stroke = path.getAttribute("stroke");
-      if (
-        stroke !== "#8B4513" &&
-        stroke !== "#228B22" &&
-        stroke !== "#4682B4" &&
-        stroke !== "#708090" &&
-        stroke !== "#CD853F" &&
-        stroke !== "#20B2AA"
-      ) {
-        path.remove();
-      }
-    });
-  }
-}
-
-// Fonction pour normaliser l'ordre des classes (toujours la même direction)
-function normalizeOrder(classA, classB) {
-  const order = [
-    "kaamelott",
-    "village1",
-    "village2",
-    "broceliande",
-    "orcanie",
-    "carmelide",
-    "hammeau",
-    "mountain",
-    "avalon",
-    "lugdunum",
-  ];
-
-  const indexA = order.indexOf(classA);
-  const indexB = order.indexOf(classB);
-
-  if (indexA < indexB) {
-    return [classA, classB];
-  } else {
-    return [classB, classA];
-  }
-}
-
-// Fonction modifiée pour dessiner les lignes toujours dans le même sens
-function drawConsistentLine(classA, classB, color = "red", delay = 0) {
-  const [firstClass, secondClass] = normalizeOrder(classA, classB);
-  drawCurveBetweenCircles(firstClass, secondClass, color, delay);
-}
-
+// ===== GESTION DE L'AFFICHAGE =====
 function updateNodeDistance(nodeName, distance) {
   const element = document.querySelector(`.${nodeName}`);
-  console.log("Mise à jour de la distance pour", nodeName, ":", distance);
   if (element) {
     const distanceElem = element.querySelector("p:nth-of-type(2)");
     if (distanceElem) {
@@ -92,31 +41,106 @@ function updateNodeDistance(nodeName, distance) {
   }
 }
 
+function highlightNode(nodeName, color) {
+  const element = document.querySelector(`.${nodeName}`);
+  if (!element) return;
+
+  element.style.border = `4px solid ${color}`;
+
+  // Marquer comme visité (vert)
+  if (color === "#B0F2B6") {
+    const nameElement = element.querySelector("p:nth-of-type(1)");
+    if (nameElement) {
+      nameElement.style.cssText =
+        "text-decoration: line-through; color: #666; opacity: 0.7;";
+    }
+  }
+
+  // Retirer le surlignage après délai (sauf pour les visités)
+  const duration = color === "#6984a3" ? 3000 : 2000;
+  setTimeout(() => {
+    if (color !== "#B0F2B6") {
+      element.style.border = "";
+      const nameElement = element.querySelector("p:nth-of-type(1)");
+      if (nameElement) {
+        nameElement.style.cssText = "";
+      }
+    }
+  }, duration);
+}
+
+function clearAlgorithmLines() {
+  const svg = document.getElementById("svg-lines");
+  if (!svg) return;
+
+  // SOLUTION TEMPORAIRE: Supprimer TOUTES les lignes puis redessiner les routes
+  svg.innerHTML = ""; // Vide complètement le SVG
+}
+
+// ===== DESSIN CONSISTANT =====
+const NODE_ORDER = [
+  "kaamelott",
+  "village1",
+  "village2",
+  "broceliande",
+  "orcanie",
+  "carmelide",
+  "hammeau",
+  "mountain",
+  "avalon",
+  "lugdunum",
+];
+
+function normalizeOrder(classA, classB) {
+  const indexA = NODE_ORDER.indexOf(classA);
+  const indexB = NODE_ORDER.indexOf(classB);
+  return indexA < indexB ? [classA, classB] : [classB, classA];
+}
+
+function drawConsistentLine(classA, classB, color = "red", delay = 0) {
+  const [firstClass, secondClass] = normalizeOrder(classA, classB);
+  drawCurveBetweenNodes(firstClass, secondClass, color, delay);
+}
+
+function drawConsistentLineWithId(classA, classB, color = "red", delay = 0) {
+  const [firstClass, secondClass] = normalizeOrder(classA, classB);
+  return drawCurveWithId(firstClass, secondClass, color, delay);
+}
+
+// ===== ALGORITHME DE DIJKSTRA =====
 async function dijkstra(graph, start, end) {
+  resetPause(); // Réinitialiser l'état de pause
   clearAlgorithmLines();
   logInfo(`DIJKSTRA : ${start} → ${end}`);
   await sleep(1000);
 
+  // Afficher le bouton pause
+  const pauseButton = document.getElementById("pauseButton");
+  if (pauseButton) {
+    pauseButton.style.display = "block";
+  }
+
+  // Initialisation
   const distances = {};
   const previous = {};
   const visited = new Set();
 
-  // Initialisation
   for (let node in graph) {
     distances[node] = Infinity;
     previous[node] = null;
   }
   distances[start] = 0;
-  updateNodeDistance(start, 0); // Afficher 0 pour le point de départ
+  updateNodeDistance(start, 0);
   await sleep(1500);
 
   let iteration = 1;
 
+  // Boucle principale
   while (true) {
     logInfo(`Itération ${iteration} - Recherche du plus proche...`);
     await sleep(800);
 
-    // Trouver le nœud le plus proche non visité
+    // Trouver le nœud non visité le plus proche
     let closest = null;
     for (let node in distances) {
       if (!visited.has(node)) {
@@ -126,6 +150,7 @@ async function dijkstra(graph, start, end) {
       }
     }
 
+    // Vérifications de fin
     if (closest === null || distances[closest] === Infinity) {
       logInfo("Aucun chemin trouvé !");
       break;
@@ -138,6 +163,7 @@ async function dijkstra(graph, start, end) {
     }
 
     logInfo(`Examen de ${closest} (distance: ${distances[closest]})`);
+    await sleep(500); // Point de pause
 
     // Examiner les voisins
     for (let neighbor in graph[closest]) {
@@ -145,47 +171,40 @@ async function dijkstra(graph, start, end) {
       const newDist = distances[closest] + edgeWeight;
       const oldDist = distances[neighbor];
 
+      // Amélioration trouvée
       if (newDist < distances[neighbor]) {
         distances[neighbor] = newDist;
         previous[neighbor] = closest;
 
-        // Mettre à jour l'affichage de la distance
         updateNodeDistance(neighbor, newDist);
 
-        // Dessiner une ligne bleue temporaire pour montrer l'amélioration
-        const blueLineId = drawConsistentLineWithId(
-          closest,
-          neighbor,
-          "#6984a3",
-          0
-        );
-
-        // Surligner le voisin en bleu quand sa distance est améliorée
+        // Animation de l'amélioration
+        drawConsistentLineWithId(closest, neighbor, "#6984a3", 0);
         highlightNode(neighbor, "#6984a3");
 
         logInfo(
-          `${neighbor} : ${
+          `💡 ${neighbor} : ${
             oldDist === Infinity ? "∞" : oldDist
           } → ${newDist} (via ${closest})`
         );
 
-        await sleep(1500); // Plus de temps pour voir la ligne bleue
-
-        // Supprimer la ligne bleue après l'animation
-        setTimeout(() => {
-          removeLineById(blueLineId);
-        }, 2000);
+        await sleep(1500); // Point de pause après chaque amélioration
       }
     }
 
+    // Marquer comme visité
     visited.add(closest);
-    // Marquer comme visité en vert
     highlightNode(closest, "#B0F2B6");
     iteration++;
-    await sleep(1000);
+    await sleep(1000); // Point de pause après chaque itération
   }
 
-  // Reconstruire et afficher le chemin optimal
+  // Cacher le bouton pause à la fin
+  if (pauseButton) {
+    pauseButton.style.display = "none";
+  }
+
+  // Reconstruction du chemin optimal
   const path = [];
   let current = end;
   while (current && previous[current]) {
@@ -194,144 +213,72 @@ async function dijkstra(graph, start, end) {
   }
   if (current) path.unshift(current);
 
-  // Tracer le chemin optimal en jaune épais avec lignes consistantes
+  // Tracer le chemin optimal en jaune
+  clearAlgorithmLines();
+  await sleep(500);
   for (let i = 0; i < path.length - 1; i++) {
     drawConsistentLine(path[i], path[i + 1], "#D4AF37", i * 200);
+    await sleep(200); // Pause entre chaque segment du chemin
   }
 
   logInfo(
     `🏆 Chemin optimal: ${path.join(" → ")} (Distance: ${distances[end]})`
   );
-
   return { distance: distances[end], path };
 }
 
-// Fonction pour dessiner une ligne avec ID unique
-function drawConsistentLineWithId(classA, classB, color = "red", delay = 0) {
-  const [firstClass, secondClass] = normalizeOrder(classA, classB);
-  const uniqueId = `line-${Date.now()}-${Math.random()}`;
-
-  setTimeout(() => {
-    const svg = document.getElementById("svg-lines") || createSVG();
-
-    const elA = document.querySelector(`.${firstClass}`);
-    const elB = document.querySelector(`.${secondClass}`);
-
-    if (!elA || !elB) return;
-
-    const a = getCircleData(elA);
-    const b = getCircleData(elB);
-
-    const angle = Math.atan2(b.y - a.y, b.x - a.x);
-    const start = getPointOnCircle(a, angle);
-    const end = getPointOnCircle(b, angle + Math.PI);
-
-    const mx = (start.x + end.x) / 2;
-    const my = (start.y + end.y) / 2;
-    const perpAngle = angle + Math.PI / 2;
-    const curveOffset = 50;
-    const cx = mx + curveOffset * Math.cos(perpAngle);
-    const cy = my + curveOffset * Math.sin(perpAngle);
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute(
-      "d",
-      `M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`
-    );
-    path.setAttribute("stroke", color);
-    path.setAttribute("stroke-width", "4");
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke-dasharray", "8,4");
-    path.setAttribute("id", uniqueId);
-
-    svg.appendChild(path);
-    animatePath(path, 1000);
-  }, delay);
-
-  return uniqueId;
-}
-
-// Fonction pour supprimer une ligne par son ID
-function removeLineById(lineId) {
-  const line = document.getElementById(lineId);
-  if (line) {
-    line.style.opacity = "0";
-    line.style.transition = "opacity 0.5s ease-out";
-    setTimeout(() => {
-      if (line.parentNode) {
-        line.parentNode.removeChild(line);
-      }
-    }, 500);
-  }
-}
-
-// Fonction utilitaire pour créer le SVG s'il n'existe pas
-function createSVG() {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("id", "svg-lines");
-  svg.style.position = "absolute";
-  svg.style.top = "0";
-  svg.style.left = "0";
-  svg.style.width = "100vw";
-  svg.style.height = "100vh";
-  svg.style.pointerEvents = "none";
-  svg.style.zIndex = "1";
-  document.body.appendChild(svg);
-  return svg;
-}
-
-// Fonction pour surligner un nœud
-function highlightNode(nodeName, color) {
-  const element = document.querySelector(`.${nodeName}`);
-  if (element) {
-    element.style.border = `4px solid ${color}`;
-
-    // Si c'est vert (visité), rayer le texte du nom
-    if (color === "#B0F2B6") {
-      const nameElement = element.querySelector("p:nth-of-type(1)");
-      if (nameElement) {
-        nameElement.style.textDecoration = "line-through";
-        nameElement.style.color = "#666";
-        nameElement.style.opacity = "0.7";
-      }
-    }
-
-    // Durée différente selon la couleur
-    const duration = color === "#6984a3" ? 3000 : 2000;
-
-    // Retirer le surlignage après la durée définie
-    setTimeout(() => {
-      element.style.border = "";
-      element.style.boxShadow = "";
-
-      // CORRECTION: Ne pas retirer le style barré pour les nœuds visités (vert)
-      if (color !== "#B0F2B6") {
-        // Changé de "#44ff44" vers "#B0F2B6"
-        const nameElement = element.querySelector("p:nth-of-type(1)");
-        if (nameElement) {
-          nameElement.style.textDecoration = "";
-          nameElement.style.color = "";
-          nameElement.style.opacity = "";
-        }
-      }
-    }, duration);
-  }
-}
-
-// Fonction principale pour lancer Dijkstra
+// ===== FONCTION PRINCIPALE =====
 async function runDijkstra() {
-  // Exemple : de kaamelott vers lugdunum
   const start = "kaamelott";
   const end = "lugdunum";
 
   const result = await dijkstra(graph, start, end);
 
-  setTimeout(() => {
-    logInfo(
-      `RÉSULTAT: Distance ${result.distance}, Chemin: ${result.path.join(
-        " → "
-      )}`
-    );
-    document.getElementById("enterLab").style.display = "block";
-  }, result.path.length * 200 + 1000);
+  // Afficher le résultat final
+
+  logInfo(
+    `RÉSULTAT: Distance ${result.distance}, Chemin: ${result.path.join(" → ")}`
+  );
+  await sleep(1000);
+  const enterButton = document.getElementById("enterLab");
+  if (enterButton) enterButton.style.display = "block";
+}
+
+// ===== FONCTIONS DE PAUSE =====
+function pauseExecution() {
+  return new Promise((resolve) => {
+    if (isPaused) {
+      pauseResolver = resolve;
+    } else {
+      resolve();
+    }
+  });
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  const pauseButton = document.getElementById("pauseButton");
+
+  if (isPaused) {
+    pauseButton.textContent = "Reprendre";
+    pauseButton.style.backgroundColor = "#4CAF50";
+    logInfo("⏸️ ALGORITHME EN PAUSE - Cliquez sur Reprendre");
+  } else {
+    pauseButton.textContent = "Pause";
+    pauseButton.style.backgroundColor = "#ff9800";
+    if (pauseResolver) {
+      pauseResolver();
+      pauseResolver = null;
+    }
+  }
+}
+
+function resetPause() {
+  isPaused = false;
+  pauseResolver = null;
+  const pauseButton = document.getElementById("pauseButton");
+  if (pauseButton) {
+    pauseButton.textContent = "Pause";
+    pauseButton.style.backgroundColor = "#ff9800";
+  }
 }

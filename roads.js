@@ -1,3 +1,4 @@
+// ===== UTILITAIRES GÉOMÉTRIQUES =====
 function getCircleData(element) {
   const rect = element.getBoundingClientRect();
   return {
@@ -14,35 +15,46 @@ function getPointOnCircle(center, angleRad) {
   };
 }
 
-// Animation du tracé en pointillé
+// ===== GESTION DU SVG =====
+function createOrGetSVG() {
+  let svg = document.getElementById("svg-lines");
+  if (!svg) {
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("id", "svg-lines");
+    svg.style.cssText = `
+      position: absolute; top: 0; left: 0; 
+      width: 100vw; height: 100vh; 
+      pointer-events: none; z-index: 1;
+    `;
+    document.body.appendChild(svg);
+  }
+  return svg;
+}
+
+// ===== ANIMATION DES LIGNES =====
 function animatePath(path, duration = 1200) {
   const length = path.getTotalLength();
   path.style.strokeDasharray = "12,8";
   path.style.strokeDashoffset = length;
-  path.getBoundingClientRect(); // Force le reflow
+  path.getBoundingClientRect(); // Force reflow
 
   let start = null;
-  function step(ts) {
-    if (!start) start = ts;
-    const progress = Math.min((ts - start) / duration, 1);
+  function step(timestamp) {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
     path.style.strokeDashoffset = length * (1 - progress);
     if (progress < 1) {
       requestAnimationFrame(step);
-    } else {
-      path.style.strokeDashoffset = 0;
     }
   }
   requestAnimationFrame(step);
 }
 
-function drawCurveBetweenCircles(classA, classB, color = "red", delay = 0) {
+// ===== DESSIN DES LIGNES =====
+function drawCurveBetweenNodes(classA, classB, color = "red", delay = 0) {
   setTimeout(() => {
     const elA = document.querySelector(`.${classA}`);
     const elB = document.querySelector(`.${classB}`);
-
-    console.log(`Recherche: .${classA} et .${classB}`);
-    console.log("Élément A:", elA);
-    console.log("Élément B:", elB);
 
     if (!elA || !elB) {
       console.error(`Éléments non trouvés: ${classA} ou ${classB}`);
@@ -52,31 +64,21 @@ function drawCurveBetweenCircles(classA, classB, color = "red", delay = 0) {
     const a = getCircleData(elA);
     const b = getCircleData(elB);
 
+    // Calcul des points de connexion
     const angle = Math.atan2(b.y - a.y, b.x - a.x);
     const start = getPointOnCircle(a, angle);
     const end = getPointOnCircle(b, angle + Math.PI);
 
+    // Création de la courbe
     const mx = (start.x + end.x) / 2;
     const my = (start.y + end.y) / 2;
     const perpAngle = angle + Math.PI / 2;
-    const curveOffset = 50; // Réduit pour une grille plus petite
+    const curveOffset = 50;
     const cx = mx + curveOffset * Math.cos(perpAngle);
     const cy = my + curveOffset * Math.sin(perpAngle);
 
-    let svg = document.getElementById("svg-lines");
-    if (!svg) {
-      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("id", "svg-lines");
-      svg.style.position = "absolute";
-      svg.style.top = "0";
-      svg.style.left = "0";
-      svg.style.width = "100vw";
-      svg.style.height = "100vh";
-      svg.style.pointerEvents = "none";
-      svg.style.zIndex = "1"; // Au-dessus de la grille mais sous le contenu
-      document.body.appendChild(svg);
-    }
-
+    // Création du path SVG
+    const svg = createOrGetSVG();
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute(
       "d",
@@ -86,39 +88,63 @@ function drawCurveBetweenCircles(classA, classB, color = "red", delay = 0) {
     path.setAttribute("stroke-width", "3");
     path.setAttribute("fill", "none");
     path.setAttribute("stroke-dasharray", "8,4");
-    svg.appendChild(path);
 
+    svg.appendChild(path);
     animatePath(path, 1500);
   }, delay);
 }
 
-function drawAllRoads() {
-  // Attendre que tous les éléments soient chargés
+// Fonction avec ID unique pour suppression ultérieure
+function drawCurveWithId(classA, classB, color = "red", delay = 0) {
+  const uniqueId = `line-${Date.now()}-${Math.random()}`;
+
   setTimeout(() => {
-    // Routes depuis Kaamelott
-    drawCurveBetweenCircles("kaamelott", "village1", "#383E42", 0); // Marron
-    drawCurveBetweenCircles("kaamelott", "village2", "#383E42", 200); // Marron
-    drawCurveBetweenCircles("kaamelott", "broceliande", "#383E42", 400); // Vert forêt
+    drawCurveBetweenNodes(classA, classB, color, 0);
+    const paths = document.querySelectorAll("#svg-lines path");
+    const lastPath = paths[paths.length - 1];
+    if (lastPath) lastPath.setAttribute("id", uniqueId);
+  }, delay);
 
-    // Routes entre villages
-    drawCurveBetweenCircles("village1", "orcanie", "#383E42", 600); // Bleu acier
-    drawCurveBetweenCircles("village1", "mountain", "#383E42", 800); // Gris ardoise
+  return uniqueId;
+}
 
-    drawCurveBetweenCircles("village2", "carmelide", "#383E42", 1000); // Bleu acier
-    drawCurveBetweenCircles("village2", "hammeau", "#383E42", 1200); // Brun sable
+// Suppression d'une ligne par ID
+function removeLineById(lineId) {
+  const line = document.getElementById(lineId);
+  if (line) {
+    line.style.transition = "opacity 0.5s ease-out";
+    line.style.opacity = "0";
+    setTimeout(() => line.remove(), 500);
+  }
+}
 
-    // Routes depuis autres lieux
-    drawCurveBetweenCircles("orcanie", "mountain", "#383E42", 1400);
-    drawCurveBetweenCircles("carmelide", "lugdunum", "#383E42", 1600); // Turquoise clair
-    drawCurveBetweenCircles("hammeau", "lugdunum", "#383E42", 1800);
-    drawCurveBetweenCircles("broceliande", "avalon", "#383E42", 2000);
-    drawCurveBetweenCircles("mountain", "avalon", "#383E42", 2200);
-    drawCurveBetweenCircles("avalon", "lugdunum", "#383E42", 2400);
+// ===== DESSIN DES ROUTES INITIALES =====
+const ROAD_CONNECTIONS = [
+  ["kaamelott", "village1"],
+  ["kaamelott", "village2"],
+  ["kaamelott", "broceliande"],
+  ["village1", "orcanie"],
+  ["village1", "mountain"],
+  ["village2", "carmelide"],
+  ["village2", "hammeau"],
+  ["orcanie", "mountain"],
+  ["carmelide", "lugdunum"],
+  ["hammeau", "lugdunum"],
+  ["broceliande", "avalon"],
+  ["mountain", "avalon"],
+  ["avalon", "lugdunum"],
+];
+
+function drawAllRoads() {
+  setTimeout(() => {
+    ROAD_CONNECTIONS.forEach(([nodeA, nodeB], index) => {
+      drawCurveBetweenNodes(nodeA, nodeB, "#383E42", index * 200);
+    });
   }, 500);
 }
 
-// Attendre le chargement complet
+// Lancer le dessin des routes au chargement
 window.addEventListener("load", () => {
-  console.log("Page chargée, début du tracé des routes...");
+  console.log("Début du tracé des routes...");
   drawAllRoads();
 });
