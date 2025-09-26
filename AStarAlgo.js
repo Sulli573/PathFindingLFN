@@ -92,6 +92,21 @@ class AstarAlgo {
     this.onNodeProcessed = callback;
   }
 
+  // Set delay duration for visualization
+  setDelayDuration(ms) {
+    this.delayDuration = Math.max(50, Math.min(2000, ms)); // Clamp between 50ms and 2000ms
+  }
+
+  // Cancel ongoing pathfinding
+  cancel() {
+    this.isPaused = false;
+    if (this.resumeResolve) {
+      this.resumeResolve();
+      this.resumeResolve = null;
+      this.resumePromise = null;
+    }
+  }
+
   // Find path from start to end using A* algorithm (async version)
   async findPath(startPos, endPos) {
     // Reset lists for new search

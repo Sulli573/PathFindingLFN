@@ -1,3 +1,4 @@
+<<<<<<< HEAD
      /* Style global */
     body {
   
@@ -166,7 +167,6 @@ img {
    transform: scaleX(-1); /* retourne l'image horizontalement */
 
 }
-
 
 @keyframes flash {
   0%, 100% { opacity: 0; }
