@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
      /* Style global */
     body {
   
@@ -8,7 +8,17 @@
       background-color: rgb(247, 247, 247);
 
     }
-
+.parchemin {
+  background-color: bisque;
+  width: 800px;
+  height: 100px;
+  align-self: center;
+ background-image: url("image/parchemin.png");
+ background-repeat: no-repeat;
+ align-content: center;
+ z-index: 1;
+ 
+}
     /* Barre de navigation */
     nav {
       background: #333;
@@ -165,6 +175,7 @@ img {
   opacity: 0;
   animation: flash 3s infinite; /* cycle de réaparition des éclairs*/
    transform: scaleX(-1); /* retourne l'image horizontalement */
+
 
 }
 
